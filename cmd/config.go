@@ -13,9 +13,7 @@ var configCmd = &cobra.Command{
 	Long:  `A Fast and Flexible Config Toolkit.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		server := core.ServerInstance
-		server.Init()
-
-		fmt.Println(core.ServerInstance.Config.GetAllConfigs())
+		fmt.Println(server.Config.GetAllConfigs())
 	},
 }
 

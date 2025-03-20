@@ -2,23 +2,44 @@ package core
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/shplume/Modou/middleware"
 	"github.com/shplume/Modou/pkg/config"
+	"github.com/shplume/Modou/pkg/logger"
 )
 
 type Server struct {
 	Config config.ConfigReader
-	Router *gin.Engine
+	Logger logger.Logger
+	*gin.Engine
 }
 
-var ServerInstance = NewDefaultServer()
+type ServerOptionFunc func(*Server)
 
-func NewDefaultServer() *Server {
-	return &Server{
-		Config: config.NewDefaultConfigReader(),
+func WithConfigReader(config config.ConfigReader) ServerOptionFunc {
+	return func(s *Server) {
+		s.Config = config
 	}
 }
 
-func (s *Server) Init() {
+func WithLogger(logger logger.Logger) ServerOptionFunc {
+	return func(s *Server) {
+		s.Logger = logger
+	}
+}
+
+func NewServer(opts ...ServerOptionFunc) *Server {
+	server := &Server{}
+
+	for _, opt := range opts {
+		opt(server)
+	}
+
+	server.init()
+
+	return server
+}
+
+func (s *Server) init() {
 	s.Config.SetConfigPath([]string{"./config/", "."})
 
 	if err := s.Config.LoadEnvConfig(".env"); err != nil {
@@ -48,11 +69,24 @@ func (s *Server) Init() {
 		}
 	}
 
-	s.Router = gin.Default()
+	s.Engine = gin.Default()
 }
 
 func (s *Server) Run() {
-	s.Init()
+	s.Engine.Run(s.Config.Get("address"))
+}
 
-	s.Router.Run(s.Config.Get("address"))
+var ServerInstance = NewDefaultServer()
+
+func NewDefaultServer() *Server {
+	opts := []ServerOptionFunc{
+		WithConfigReader(config.NewDefaultConfigReader()),
+		WithLogger(logger.NewDefaultLogger()),
+	}
+
+	server := NewServer(opts...)
+
+	server.Use(middleware.LoggerMiddleware(server.Logger))
+
+	return server
 }

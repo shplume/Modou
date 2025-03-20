@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/shplume/Modou/core"
+	"github.com/shplume/Modou/router"
 	"github.com/spf13/cobra"
 )
 
@@ -14,6 +15,8 @@ var serverCmd = &cobra.Command{
 	Long:  `A Fast and Flexible Server Toolkit.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		server := core.ServerInstance
+
+		router.Init(server)
 
 		server.Run()
 	},
