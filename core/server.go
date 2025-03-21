@@ -80,13 +80,16 @@ var ServerInstance = NewDefaultServer()
 
 func NewDefaultServer() *Server {
 	opts := []ServerOptionFunc{
-		WithConfigReader(config.NewDefaultConfigReader()),
-		WithLogger(logger.NewDefaultLogger()),
+		WithConfigReader(config.DefaultConfigReaderInstance),
+		WithLogger(logger.DefaultLoggerInstance),
 	}
 
 	server := NewServer(opts...)
 
-	server.Use(middleware.LoggerMiddleware(server.Logger))
+	manager := NewContextManager()
+	manager.Use(middleware.NewLoggerProvider(logger.DefaultLoggerInstance))
+
+	server.Use(manager.Build())
 
 	return server
 }

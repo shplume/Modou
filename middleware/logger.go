@@ -5,9 +5,14 @@ import (
 	"github.com/shplume/Modou/pkg/logger"
 )
 
-func LoggerMiddleware(logger logger.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set("logger", logger)
-		c.Next()
-	}
+type LoggerProvider struct {
+	logger logger.Logger
+}
+
+func NewLoggerProvider(logger logger.Logger) *LoggerProvider {
+	return &LoggerProvider{logger: logger}
+}
+
+func (p *LoggerProvider) Provide(c *gin.Context) {
+	c.Set("logger", p.logger)
 }

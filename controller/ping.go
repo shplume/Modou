@@ -5,7 +5,7 @@ import (
 )
 
 func Ping(c *core.Context) {
-	c.GetLogger().Info("recv ping")
+	c.Logger().Info("recv ping")
 
 	c.JSON(200, successResponse("pong"))
 }

@@ -9,6 +9,7 @@ type DefaultConfigReader struct {
 }
 
 var _ ConfigReader = &DefaultConfigReader{}
+var DefaultConfigReaderInstance = NewDefaultConfigReader()
 
 func NewDefaultConfigReader() *DefaultConfigReader {
 	return &DefaultConfigReader{
