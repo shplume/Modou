@@ -1,24 +1,33 @@
 package logger
 
-import "go.uber.org/zap"
+import (
+	"sync"
+
+	"go.uber.org/zap"
+)
 
 type DefaultLogger struct {
 	zap *zap.Logger
 }
 
-var DefaultLoggerInstance *DefaultLogger = NewDefaultLogger()
+var (
+	defaultLoggerInstance *DefaultLogger
+	once                  sync.Once
+)
+
 var _ Logger = (*DefaultLogger)(nil)
 
-func NewDefaultLogger() *DefaultLogger {
-	zapLogger, err := zap.NewProduction()
-
-	if err != nil {
-		panic(err)
-	}
-
-	return &DefaultLogger{
-		zap: zapLogger,
-	}
+func GetDefaultLogger() *DefaultLogger {
+	once.Do(func() {
+		zapLogger, err := zap.NewProduction()
+		if err != nil {
+			panic(err)
+		}
+		defaultLoggerInstance = &DefaultLogger{
+			zap: zapLogger,
+		}
+	})
+	return defaultLoggerInstance
 }
 
 func (l *DefaultLogger) Debug(msg string) {

@@ -40,7 +40,7 @@ func (m *ContextManager) Build() gin.HandlerFunc {
 func (c *Context) Logger() logger.Logger {
 	log, exists := c.Get("logger")
 	if !exists {
-		return logger.DefaultLoggerInstance
+		return logger.GetDefaultLogger()
 	}
 
 	return log.(logger.Logger)
@@ -49,7 +49,7 @@ func (c *Context) Logger() logger.Logger {
 func (c *Context) Config() config.ConfigReader {
 	conf, exists := c.Get("config")
 	if !exists {
-		return config.DefaultConfigReaderInstance
+		return config.GetDefaultConfigReader()
 	}
 
 	return conf.(config.ConfigReader)

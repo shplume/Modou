@@ -40,33 +40,11 @@ func NewServer(opts ...ServerOptionFunc) *Server {
 }
 
 func (s *Server) init() {
-	s.Config.SetConfigPath([]string{"./config/", "."})
-
-	if err := s.Config.LoadEnvConfig(".env"); err != nil {
-		panic(err)
-	}
-
-	if err := s.Config.LoadDefaultConfig("config_base"); err != nil {
-		panic(err)
-	}
-
 	mode := s.Config.Get("MODE")
-	if mode == "" {
-		mode = "development"
-	}
-
 	if mode == "development" {
 		gin.SetMode(gin.DebugMode)
-
-		if err := s.Config.LoadConfig("config_dev"); err != nil {
-			panic(err)
-		}
 	} else {
 		gin.SetMode(gin.ReleaseMode)
-
-		if err := s.Config.LoadConfig("config_prod"); err != nil {
-			panic(err)
-		}
 	}
 
 	s.Engine = gin.Default()
@@ -80,14 +58,14 @@ var ServerInstance = NewDefaultServer()
 
 func NewDefaultServer() *Server {
 	opts := []ServerOptionFunc{
-		WithConfigReader(config.DefaultConfigReaderInstance),
-		WithLogger(logger.DefaultLoggerInstance),
+		WithConfigReader(config.GetDefaultConfigReader()),
+		WithLogger(logger.GetDefaultLogger()),
 	}
 
 	server := NewServer(opts...)
 
 	manager := NewContextManager()
-	manager.Use(middleware.NewLoggerProvider(logger.DefaultLoggerInstance))
+	manager.Use(middleware.NewLoggerProvider(server.Logger))
 
 	server.Use(manager.Build())
 

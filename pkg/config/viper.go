@@ -1,6 +1,8 @@
 package config
 
 import (
+	"sync"
+
 	"github.com/spf13/viper"
 )
 
@@ -8,13 +10,20 @@ type DefaultConfigReader struct {
 	viper *viper.Viper
 }
 
-var _ ConfigReader = &DefaultConfigReader{}
-var DefaultConfigReaderInstance = NewDefaultConfigReader()
+var (
+	defaultConfigReaderInstance *DefaultConfigReader
+	once                        sync.Once
+)
 
-func NewDefaultConfigReader() *DefaultConfigReader {
-	return &DefaultConfigReader{
-		viper: viper.New(),
-	}
+func GetDefaultConfigReader() *DefaultConfigReader {
+	once.Do(func() {
+		defaultConfigReaderInstance = &DefaultConfigReader{
+			viper: viper.New(),
+		}
+
+		configInit(defaultConfigReaderInstance)
+	})
+	return defaultConfigReaderInstance
 }
 
 func (v *DefaultConfigReader) LoadEnvConfig(file string) error {
